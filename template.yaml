@@ -1,0 +1,287 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Smart Employee Onboarding & Identity Service
+
+Parameters:
+  SenderEmail:
+    Type: String
+    Description: SES-verified sender address
+  HrAlertEmail:
+    Type: String
+    Description: HR admin email that receives SNS alerts
+  ReminderSeconds:
+    Type: Number
+    Default: 86400
+    Description: Reminder interval (86400 = 24h, use 120 for a demo)
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        EMP_TABLE: !Ref EmployeesTable
+        STAGE_TABLE: !Ref StagesTable
+        DOC_BUCKET: !Sub onb-docs-${AWS::AccountId}-${AWS::Region}
+        SENDER: !Ref SenderEmail
+        TOPIC_ARN: !Ref HrTopic
+        POOL_ID: !Ref UserPool
+        SM_ARN: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:onboarding-workflow
+        SITE_URL: !GetAtt FrontendBucket.WebsiteURL
+        REMINDER_SECONDS: !Ref ReminderSeconds
+
+Resources:
+  # ---------- DynamoDB ----------
+  EmployeesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: employee_id, AttributeType: S}
+      KeySchema:
+        - {AttributeName: employee_id, KeyType: HASH}
+
+  StagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: employee_id, AttributeType: S}
+        - {AttributeName: stage, AttributeType: S}
+      KeySchema:
+        - {AttributeName: employee_id, KeyType: HASH}
+        - {AttributeName: stage, KeyType: RANGE}
+
+  # ---------- S3 ----------
+  DocBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub onb-docs-${AWS::AccountId}-${AWS::Region}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [POST, PUT, GET]
+            AllowedOrigins: ["*"]
+            AllowedHeaders: ["*"]
+            MaxAge: 3000
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub onb-site-${AWS::AccountId}-${AWS::Region}
+      WebsiteConfiguration:
+        IndexDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  FrontendPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+
+  # ---------- SNS ----------
+  HrTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: hr-admin-alerts
+      Subscription:
+        - {Protocol: email, Endpoint: !Ref HrAlertEmail}
+
+  # ---------- Cognito ----------
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: onboarding-users
+      UsernameAttributes: [email]
+      AutoVerifiedAttributes: [email]
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      Schema:
+        - Name: employee_id
+          AttributeDataType: String
+          Mutable: true
+          StringAttributeConstraints: {MinLength: "1", MaxLength: "64"}
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows: [ALLOW_USER_PASSWORD_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
+
+  GroupHr:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: {UserPoolId: !Ref UserPool, GroupName: HRAdmin}
+
+  GroupEmployees:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: {UserPoolId: !Ref UserPool, GroupName: Employees}
+
+  # ---------- IAM (one shared role for all Lambdas) ----------
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: onboarding-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:Query, dynamodb:Scan, dynamodb:DeleteItem]
+                Resource: [!GetAtt EmployeesTable.Arn, !GetAtt StagesTable.Arn]
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
+                Resource: !Sub "arn:aws:s3:::onb-docs-${AWS::AccountId}-${AWS::Region}/*"
+              - Effect: Allow
+                Action: [ses:SendEmail, ses:SendRawEmail]
+                Resource: "*"
+              - Effect: Allow
+                Action: sns:Publish
+                Resource: !Ref HrTopic
+              - Effect: Allow
+                Action: [cognito-idp:AdminCreateUser, cognito-idp:AdminAddUserToGroup, cognito-idp:AdminDeleteUser]
+                Resource: !GetAtt UserPool.Arn
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:onboarding-workflow
+              - Effect: Allow
+                Action: states:SendTaskSuccess
+                Resource: "*"
+              - Effect: Allow
+                Action: states:StopExecution
+                Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:onboarding-workflow:*
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub arn:aws:s3:::onb-docs-${AWS::AccountId}-${AWS::Region}
+
+  # ---------- API Gateway (HTTP API + Cognito JWT) ----------
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: ["*"]
+        AllowHeaders: [authorization, content-type]
+        AllowMethods: [GET, POST, DELETE, OPTIONS]
+      Auth:
+        DefaultAuthorizer: CognitoJwt
+        Authorizers:
+          CognitoJwt:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
+              audience: [!Ref UserPoolClient]
+
+  # ---------- Lambdas ----------
+  ApiFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.api_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: src/
+      Events:
+        ListEmployees:
+          Type: HttpApi
+          Properties: {ApiId: !Ref HttpApi, Path: "/employees", Method: GET}
+        CreateEmployee:
+          Type: HttpApi
+          Properties: {ApiId: !Ref HttpApi, Path: "/employees", Method: POST}
+        Progress:
+          Type: HttpApi
+          Properties: {ApiId: !Ref HttpApi, Path: "/employees/{id}/progress", Method: GET}
+        UploadUrl:
+          Type: HttpApi
+          Properties: {ApiId: !Ref HttpApi, Path: "/employees/{id}/upload-url", Method: POST}
+        CompleteStage:
+          Type: HttpApi
+          Properties: {ApiId: !Ref HttpApi, Path: "/employees/{id}/stages/{stage}/complete", Method: POST}
+        ResendOffer:
+          Type: HttpApi
+          Properties: {ApiId: !Ref HttpApi, Path: "/employees/{id}/offer-letter", Method: POST}
+        RemoveEmployee:
+          Type: HttpApi
+          Properties: {ApiId: !Ref HttpApi, Path: "/employees/{id}", Method: DELETE}
+
+  StageStartFn:
+    Type: AWS::Serverless::Function
+    Properties: {Handler: app.stage_start, Role: !GetAtt LambdaRole.Arn, CodeUri: src/}
+
+  ReminderFn:
+    Type: AWS::Serverless::Function
+    Properties: {Handler: app.send_reminder, Role: !GetAtt LambdaRole.Arn, CodeUri: src/}
+
+  FinalizeFn:
+    Type: AWS::Serverless::Function
+    Properties: {Handler: app.finalize, Role: !GetAtt LambdaRole.Arn, CodeUri: src/}
+
+  ValidateFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.validate_document
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: src/
+      Events:
+        Upload:
+          Type: S3
+          Properties: {Bucket: !Ref DocBucket, Events: "s3:ObjectCreated:*"}
+
+  # ---------- Step Functions ----------
+  OnboardingSM:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: onboarding-workflow
+      DefinitionUri: statemachine/onboarding.asl.json
+      DefinitionSubstitutions:
+        StageStartArn: !GetAtt StageStartFn.Arn
+        ReminderArn: !GetAtt ReminderFn.Arn
+        FinalizeArn: !GetAtt FinalizeFn.Arn
+      Policies:
+        - LambdaInvokePolicy: {FunctionName: !Ref StageStartFn}
+        - LambdaInvokePolicy: {FunctionName: !Ref ReminderFn}
+        - LambdaInvokePolicy: {FunctionName: !Ref FinalizeFn}
+
+Outputs:
+  ApiUrl:
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+  UserPoolId:
+    Value: !Ref UserPool
+  ClientId:
+    Value: !Ref UserPoolClient
+  FrontendBucket:
+    Value: !Ref FrontendBucket
+  SiteUrl:
+    Value: !GetAtt FrontendBucket.WebsiteURL
+  DocBucketName:
+    Value: !Sub onb-docs-${AWS::AccountId}-${AWS::Region}

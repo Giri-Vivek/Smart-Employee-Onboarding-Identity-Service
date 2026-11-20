@@ -1,0 +1,88 @@
+{
+  "Comment": "Onboarding: Documents -> IT -> Policies -> Manager Intro. Each stage waits for a task token; on timeout (24h) a reminder is sent and the stage is re-entered.",
+  "StartAt": "DOCUMENTS",
+  "States": {
+    "DOCUMENTS": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${StageStartArn}",
+        "Payload": {"stage": "DOCUMENTS", "employee_id.$": "$.employee_id", "token.$": "$$.Task.Token"}
+      },
+      "TimeoutSecondsPath": "$.reminder_seconds",
+      "ResultPath": null,
+      "Catch": [{"ErrorEquals": ["States.Timeout"], "ResultPath": null, "Next": "REMIND_DOCUMENTS"}],
+      "Next": "IT_PROVISIONING"
+    },
+    "REMIND_DOCUMENTS": {
+      "Type": "Task",
+      "Resource": "${ReminderArn}",
+      "Parameters": {"stage": "DOCUMENTS", "employee_id.$": "$.employee_id"},
+      "ResultPath": null,
+      "Next": "DOCUMENTS"
+    },
+    "IT_PROVISIONING": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${StageStartArn}",
+        "Payload": {"stage": "IT_PROVISIONING", "employee_id.$": "$.employee_id", "token.$": "$$.Task.Token"}
+      },
+      "TimeoutSecondsPath": "$.reminder_seconds",
+      "ResultPath": null,
+      "Catch": [{"ErrorEquals": ["States.Timeout"], "ResultPath": null, "Next": "REMIND_IT"}],
+      "Next": "POLICY_SIGNOFF"
+    },
+    "REMIND_IT": {
+      "Type": "Task",
+      "Resource": "${ReminderArn}",
+      "Parameters": {"stage": "IT_PROVISIONING", "employee_id.$": "$.employee_id"},
+      "ResultPath": null,
+      "Next": "IT_PROVISIONING"
+    },
+    "POLICY_SIGNOFF": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${StageStartArn}",
+        "Payload": {"stage": "POLICY_SIGNOFF", "employee_id.$": "$.employee_id", "token.$": "$$.Task.Token"}
+      },
+      "TimeoutSecondsPath": "$.reminder_seconds",
+      "ResultPath": null,
+      "Catch": [{"ErrorEquals": ["States.Timeout"], "ResultPath": null, "Next": "REMIND_POLICY"}],
+      "Next": "MANAGER_INTRO"
+    },
+    "REMIND_POLICY": {
+      "Type": "Task",
+      "Resource": "${ReminderArn}",
+      "Parameters": {"stage": "POLICY_SIGNOFF", "employee_id.$": "$.employee_id"},
+      "ResultPath": null,
+      "Next": "POLICY_SIGNOFF"
+    },
+    "MANAGER_INTRO": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${StageStartArn}",
+        "Payload": {"stage": "MANAGER_INTRO", "employee_id.$": "$.employee_id", "token.$": "$$.Task.Token"}
+      },
+      "TimeoutSecondsPath": "$.reminder_seconds",
+      "ResultPath": null,
+      "Catch": [{"ErrorEquals": ["States.Timeout"], "ResultPath": null, "Next": "REMIND_MANAGER"}],
+      "Next": "FINALIZE"
+    },
+    "REMIND_MANAGER": {
+      "Type": "Task",
+      "Resource": "${ReminderArn}",
+      "Parameters": {"stage": "MANAGER_INTRO", "employee_id.$": "$.employee_id"},
+      "ResultPath": null,
+      "Next": "MANAGER_INTRO"
+    },
+    "FINALIZE": {
+      "Type": "Task",
+      "Resource": "${FinalizeArn}",
+      "Parameters": {"employee_id.$": "$.employee_id"},
+      "End": true
+    }
+  }
+}

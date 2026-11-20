@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="aurora">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OnboardX · Welcome aboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+@property --p{syntax:"<number>";inherits:false;initial-value:0}
+:root,[data-theme=aurora]{--bg:#090d1f;--tx:#eaeeff;--mut:#9aa4c7;--card:rgba(255,255,255,.055);--bd:rgba(255,255,255,.12);--a1:#7c5cff;--a2:#00d4ff;--a3:#ff4ecd;--in:rgba(0,0,0,.3);--dot:#1a2147;--ring:#10163a;--hov:rgba(255,255,255,.04);--sh:rgba(0,0,0,.3);--pend:#64748b;--prog:#f59e0b;--done:#22c55e;--bad:#ef4444}
+[data-theme=sunset]{--bg:#1a0b14;--a1:#ff7a45;--a2:#ffc53d;--a3:#ff3d81;--dot:#3a1626;--ring:#2a0f1c;--mut:#d3a9b8}
+[data-theme=ocean]{--bg:#04141f;--a1:#0ea5e9;--a2:#2dd4bf;--a3:#6366f1;--dot:#0b2a3b;--ring:#08202e;--mut:#8fb4c7}
+[data-theme=daylight]{--bg:#f2f5ff;--tx:#161b3a;--mut:#5b6590;--card:rgba(255,255,255,.72);--bd:rgba(22,27,58,.12);--a1:#6d4aff;--a2:#009fd1;--a3:#ff4ecd;--in:rgba(255,255,255,.95);--dot:#e4e9ff;--ring:#fff;--hov:rgba(0,0,0,.04);--sh:rgba(60,70,140,.18)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;transition:background .6s,color .6s}
+h1,h2,.logo,.mega,.stat b{font-family:"Space Grotesk",Inter,sans-serif}
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(95px);opacity:.4;animation:float 22s ease-in-out infinite;transition:background .8s}
+.b1{width:520px;height:520px;background:var(--a1);top:-150px;left:-130px}.b2{width:560px;height:560px;background:var(--a2);bottom:-220px;right:-150px;animation-delay:-8s}.b3{width:320px;height:320px;background:var(--a3);top:40%;left:55%;animation-delay:-14s}
+@keyframes float{50%{transform:translate(70px,-50px) scale(1.18)}}
+#fx{position:fixed;inset:0;z-index:-1;pointer-events:none}
+.grad{background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3),var(--a1));background-size:250%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
+@keyframes flow{to{background-position:250% 0}}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 5vw;backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5}
+header[hidden]{display:none}
+.logo{font-weight:700;font-size:22px;letter-spacing:-.5px}
+.who{display:flex;gap:12px;align-items:center;font-size:14px;color:var(--mut)}
+.badge{background:color-mix(in srgb,var(--a1) 22%,transparent);border:1px solid var(--a1);color:var(--tx);padding:3px 11px;border-radius:99px;font-size:12px;font-weight:600}
+main{max-width:1120px;margin:0 auto;padding:26px 5vw 40px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:24px;backdrop-filter:blur(18px);box-shadow:0 12px 40px var(--sh);margin-bottom:20px;transition:transform .3s,border-color .3s}
+.card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--a2) 55%,transparent)}
+.fade{animation:up .8s cubic-bezier(.2,.8,.2,1) both}.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.4s}
+@keyframes up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+h1{margin:0 0 6px;font-size:30px;letter-spacing:-.8px}h2{margin:0 0 4px;font-size:18px}.mut{color:var(--mut);margin:0 0 14px;font-size:14px}
+.eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--a2);margin:0 0 8px}
+label{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--in);color:var(--tx);font:inherit;outline:none;transition:.2s}
+input:focus,select:focus{border-color:var(--a2);box-shadow:0 0 0 3px color-mix(in srgb,var(--a2) 22%,transparent)}
+input[type=file]{padding:8px;font-size:13px}input[type=checkbox]{width:auto;accent-color:var(--a1)}
+.btn{margin-top:16px;padding:12px 22px;border:0;border-radius:12px;font:inherit;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--a1),var(--a2));background-size:200% 200%;transition:.3s;box-shadow:0 8px 24px color-mix(in srgb,var(--a1) 40%,transparent)}
+.btn:hover{transform:translateY(-2px);background-position:100% 0}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.btn.sm{margin:0;padding:9px 16px;font-size:13px}
+.ghost{background:none;border:1px solid var(--bd);color:var(--tx);padding:7px 14px;border-radius:10px;cursor:pointer;font:inherit;font-size:13px;transition:.2s}.ghost:hover{border-color:var(--a2)}
+/* landing */
+.land{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center;min-height:86vh}
+.mega{font-size:clamp(38px,5.4vw,64px);line-height:1.04;letter-spacing:-2px;margin:6px 0 16px}
+.type{font-size:20px;min-height:30px;color:var(--mut);margin:0 0 28px}.type b{color:var(--tx);font-weight:600}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--a2);margin-left:3px;vertical-align:-3px;animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
+.path{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:26px}
+.pth{padding:10px 16px;border-radius:14px;background:var(--card);border:1px solid var(--bd);font-weight:600;font-size:14px;animation:up .7s both}.arr{color:var(--a2);animation:up .7s both}
+.trust{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--mut)}.trust span{padding:6px 12px;border:1px dashed var(--bd);border-radius:99px}
+.login{margin:0;position:relative;overflow:hidden}.login::before{content:"";position:absolute;inset:-2px;background:conic-gradient(from 0deg,var(--a1),var(--a2),var(--a3),var(--a1));opacity:.16;animation:spin 8s linear infinite;z-index:-1}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* splash */
+.splash{position:fixed;inset:0;z-index:200;display:grid;place-content:center;text-align:center;background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--a1) 45%,var(--bg)),var(--bg) 70%);animation:fadein .5s both}
+.splash.out{animation:fadeout .7s forwards}@keyframes fadein{from{opacity:0}}@keyframes fadeout{to{opacity:0;transform:scale(1.06)}}
+.splash h1{font-size:clamp(46px,9vw,96px);letter-spacing:-3px;margin:4px 0 10px}.splash h1 span{display:inline-block;animation:drop .7s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes drop{from{opacity:0;transform:translateY(-60px) rotate(-8deg)}}
+.splash .g{font-size:18px;letter-spacing:4px;text-transform:uppercase;color:var(--a2);margin:0;animation:up .8s both}.splash .s{color:var(--mut);animation:up .8s .9s both;opacity:0;animation-fill-mode:both}
+.orb{width:120px;height:120px;margin:0 auto 18px;border-radius:50%;background:conic-gradient(var(--a1),var(--a2),var(--a3),var(--a1));filter:blur(.5px);animation:spin 2.2s linear infinite;-webkit-mask:radial-gradient(circle,transparent 52%,#000 54%);mask:radial-gradient(circle,transparent 52%,#000 54%)}
+/* hero + stepper */
+.hero{display:flex;align-items:center;gap:22px}.hx{flex:1;min-width:0}
+.av{width:68px;height:68px;border-radius:20px;display:grid;place-items:center;font:700 24px "Space Grotesk";color:#fff;background:linear-gradient(135deg,var(--a1),var(--a3));flex:none;box-shadow:0 8px 24px color-mix(in srgb,var(--a1) 45%,transparent)}
+.pill{display:inline-block;margin-top:8px;padding:6px 14px;border-radius:99px;font-size:13px;font-weight:600;background:color-mix(in srgb,var(--a2) 16%,transparent);border:1px solid color-mix(in srgb,var(--a2) 50%,transparent)}
+.ring{--p:0;width:100px;height:100px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--a2) calc(var(--p)*1%),var(--bd) 0);transition:--p 1.2s ease;flex:none}
+.ring b{width:80px;height:80px;border-radius:50%;background:var(--ring);display:grid;place-items:center;font-size:21px}
+.bar{height:10px;border-radius:99px;background:var(--bd);overflow:hidden;margin-bottom:28px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--a1),var(--a2),var(--done));background-size:200%;animation:flow 3s linear infinite;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.steps{display:flex}.step{flex:1;text-align:center;position:relative;font-size:13px}
+.step span{display:block;margin-top:8px;font-weight:700}.step small{color:var(--mut);display:block}.step em{display:block;font-style:normal;color:var(--mut);font-size:11px;opacity:.8}
+.step:not(:last-child)::after{content:"";position:absolute;top:25px;left:50%;width:100%;height:3px;background:var(--bd);transition:background .8s}
+.step.complete:not(:last-child)::after{background:var(--done)}
+.dot{width:52px;height:52px;border-radius:50%;margin:0 auto;display:grid;place-items:center;font-size:21px;background:var(--dot);border:3px solid var(--pend);position:relative;z-index:1;transition:.5s}
+.step.in_progress .dot{border-color:var(--prog)}.step.complete .dot{border-color:var(--done);background:var(--done);color:#fff;font-weight:800}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,.6)}100%{box-shadow:0 0 0 16px rgba(245,158,11,0)}}@keyframes pop{50%{transform:scale(1.25)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}.grid .card{margin:0}
+.doc{padding:12px 0;border-top:1px solid var(--bd)}.row{display:flex;gap:10px;margin-top:8px;align-items:center}
+.chip{font-size:11px;padding:3px 9px;border-radius:99px;background:var(--bd);color:var(--mut);margin-left:6px;font-weight:600}
+.chip.ok{background:rgba(34,197,94,.2);color:var(--done)}.chip.bad{background:rgba(239,68,68,.2);color:var(--bad)}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;text-transform:none;letter-spacing:0;color:var(--tx)}
+.banner{text-align:center;border-color:var(--done);background:linear-gradient(135deg,rgba(34,197,94,.2),color-mix(in srgb,var(--a2) 14%,transparent));margin-top:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.stats .card{margin:0 0 20px;text-align:center}
+.stat i{font-style:normal;font-size:26px}.stat b{display:block;font-size:40px;line-height:1.1}.stat span{color:var(--mut);font-size:13px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 14px;align-items:end}
+.between{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.srch{max-width:240px}
+.tw{overflow-x:auto;overflow-y:hidden}table{width:100%;border-collapse:collapse;font-size:14px;min-width:780px}
+th{text-align:left;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:10px 8px}
+td{padding:14px 8px;border-top:1px solid var(--bd);vertical-align:middle}tr.r{animation:up .5s both}tbody tr:hover td{background:var(--hov)}
+.who2{display:flex;gap:12px;align-items:center}.mini{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a3));flex:none}
+.segs{display:flex;gap:5px;min-width:200px}.seg{flex:1;height:10px;border-radius:99px;background:var(--pend);position:relative;overflow:hidden}
+.seg.in_progress{background:var(--prog)}.seg.complete{background:var(--done)}
+.seg.in_progress::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:sweep 1.4s infinite}@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.acts{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.acts .chip{margin:0}.ghost.danger{border-color:var(--bad);color:var(--bad)}.ghost.danger:hover{background:rgba(239,68,68,.12)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:12px;color:var(--mut);margin-top:14px}.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:6px 0 80px;letter-spacing:.4px}
+.dock{position:fixed;left:18px;bottom:18px;display:flex;gap:8px;padding:8px 10px;border-radius:99px;background:var(--card);border:1px solid var(--bd);backdrop-filter:blur(14px);z-index:50;align-items:center;font-size:11px;color:var(--mut)}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:.25s;padding:0}.sw:hover{transform:scale(1.2)}.sw.on{border-color:var(--tx);transform:scale(1.15)}
+#toast{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:10px;z-index:99}
+.t{background:var(--dot);color:var(--tx);border:1px solid var(--a2);padding:12px 18px;border-radius:12px;animation:up .4s both;max-width:320px;font-size:14px}.t.bad{border-color:var(--bad)}
+.cf{position:fixed;top:-20px;width:9px;height:14px;z-index:300;animation:fall linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+@media(max-width:880px){.land{grid-template-columns:1fr;gap:26px;min-height:0;padding-top:12px}}
+@media(max-width:640px){.stats{grid-template-columns:1fr}.step small,.step em{display:none}.dot{width:42px;height:42px}.step:not(:last-child)::after{top:20px}.hero{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="bg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+<canvas id="fx"></canvas>
+<header id="top" hidden>
+  <div class="logo">⚡ Onboard<span class="grad">X</span></div>
+  <div class="who"><span class="badge" id="role"></span><span id="uname"></span><button class="ghost" onclick="logout()">Sign out</button></div>
+</header>
+<main id="app"></main>
+<footer>Built on AWS · Lambda · Step Functions · Cognito · DynamoDB · S3 · SES</footer>
+<div class="dock" id="dock"></div>
+<div id="toast"></div>
+<script src="config.js"></script>
+<script>
+const $ = s => document.querySelector(s), C = window.CONFIG;
+const STAGES = [["DOCUMENTS","Documents","📄","Upload 3 files"],["IT_PROVISIONING","IT Setup","💻","Laptop & email"],["POLICY_SIGNOFF","Policies","✍️","Read & sign"],["MANAGER_INTRO","Manager Intro","🤝","Meet your manager"]];
+const DOCS = [["ID_PROOF","ID Proof"],["DEGREE_CERTIFICATE","Degree Certificate"],["SIGNED_OFFER_LETTER","Signed Offer Letter"]];
+const LABEL = {pending:"Pending",in_progress:"In progress",complete:"Complete"};
+const THEMES = [["aurora","Aurora","linear-gradient(135deg,#7c5cff,#00d4ff)","0,212,255"],["sunset","Sunset","linear-gradient(135deg,#ff7a45,#ff3d81)","255,197,61"],["ocean","Ocean","linear-gradient(135deg,#0ea5e9,#2dd4bf)","45,212,191"],["daylight","Daylight","linear-gradient(135deg,#6d4aff,#ffd166)","109,74,255"]];
+let S = JSON.parse(sessionStorage.getItem("onb") || "null"), timer, chal = null, celebrated = false, LIST = [], pc = "0,212,255";
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const jwt = t => JSON.parse(decodeURIComponent(escape(atob(t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))));
+const ini = n => String(n || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+const greet = () => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
+function toast(m, bad) { const t = document.createElement("div"); t.className = "t" + (bad ? " bad" : ""); t.textContent = m; $("#toast").append(t); setTimeout(() => t.remove(), 4200); }
+function countTo(el, n) { const from = +el.textContent || 0, t0 = performance.now(); (function f(t) { const k = Math.min((t - t0) / 700, 1); el.textContent = Math.round(from + (n - from) * k); if (k < 1) requestAnimationFrame(f); })(t0); }
+function confetti(n = 90) { const cols = ["#7c5cff","#00d4ff","#22c55e","#f59e0b","#ff4ecd"]; for (let i = 0; i < n; i++) { const d = document.createElement("i"); d.className = "cf"; d.style.cssText = `left:${Math.random()*100}vw;background:${cols[i%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.8}s`; document.body.append(d); setTimeout(() => d.remove(), 5500); } }
+function poll(fn) { clearInterval(timer); fn().catch(e => toast(e.message, true)); timer = setInterval(() => fn().catch(() => {}), 5000); }
+
+// ---------- themes + particles ----------
+function setTheme(t) { document.documentElement.dataset.theme = t; try { localStorage.setItem("onb-theme", t); } catch (e) {} pc = THEMES.find(x => x[0] === t)[3];
+  $("#dock").innerHTML = "🎨" + THEMES.map(x => `<button class="sw ${x[0] === t ? "on" : ""}" title="${x[1]}" style="background:${x[2]}" onclick="setTheme('${x[0]}')"></button>`).join(""); }
+let saved = "aurora"; try { saved = localStorage.getItem("onb-theme") || "aurora"; } catch (e) {} setTheme(saved);
+const cv = $("#fx"), cx = cv.getContext("2d"); let W, H; const P = [];
+const fit = () => { W = cv.width = innerWidth; H = cv.height = innerHeight; }; addEventListener("resize", fit); fit();
+for (let i = 0; i < 55; i++) P.push({ x: Math.random()*W, y: Math.random()*H, vx: (Math.random()-.5)*.35, vy: (Math.random()-.5)*.35, r: Math.random()*1.8+.6 });
+(function loop() { cx.clearRect(0, 0, W, H);
+  P.forEach((p, i) => { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1;
+    cx.fillStyle = `rgba(${pc},.7)`; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 7); cx.fill();
+    for (let j = i + 1; j < P.length; j++) { const q = P[j], d = Math.hypot(p.x - q.x, p.y - q.y); if (d < 120) { cx.strokeStyle = `rgba(${pc},${.2*(1-d/120)})`; cx.beginPath(); cx.moveTo(p.x, p.y); cx.lineTo(q.x, q.y); cx.stroke(); } } });
+  requestAnimationFrame(loop); })();
+
+// ---------- Cognito (direct REST, no SDK) ----------
+async function idp(target, body) {
+  const r = await fetch(`https://cognito-idp.${C.region}.amazonaws.com/`, { method: "POST",
+    headers: { "Content-Type": "application/x-amz-json-1.1", "X-Amz-Target": "AWSCognitoIdentityProviderService." + target }, body: JSON.stringify(body) });
+  const j = await r.json(); if (!r.ok) throw new Error(j.message || j.__type); return j;
+}
+async function api(path, o = {}) {
+  const r = await fetch(C.apiUrl + path, { method: o.method || "GET", headers: { Authorization: S.tok, "Content-Type": "application/json" }, body: o.body ? JSON.stringify(o.body) : undefined });
+  if (r.status === 401) { logout(); throw new Error("Session expired, please sign in again"); }
+  const j = await r.json(); if (!r.ok) throw new Error(j.error || j.message || ("Request failed (HTTP " + r.status + ")")); return j;
+}
+
+// ---------- Grand welcome page ----------
+let twTok = 0;
+function typewriter() { const el = $("#tw"); if (!el) return; const tok = ++twTok;
+  const lines = ["Upload your documents in seconds.", "Get your laptop & work email automatically.", "Sign policies with a single click.", "Meet your manager. Walk in ready for Day 1."];
+  let i = 0, c = 0, del = false;
+  (function tick() { if (tok !== twTok || !$("#tw")) return; const s = lines[i];
+    el.textContent = s.slice(0, c); if (!del && c === s.length) { del = true; return setTimeout(tick, 1600); }
+    if (del && c === 0) { del = false; i = (i + 1) % lines.length; }
+    c += del ? -1 : 1; setTimeout(tick, del ? 22 : 45); })(); }
+function loginView() {
+  clearInterval(timer); $("#top").hidden = true; chal = null; celebrated = false;
+  $("#app").innerHTML = `<div class="land">
+  <section><span class="eyebrow fade">✨ Smart Employee Onboarding</span>
+    <h1 class="mega fade d1">Welcome to the <span class="grad">team of tomorrow.</span></h1>
+    <p class="type fade d2"><b id="tw"></b><i class="caret"></i></p>
+    <div class="path">${STAGES.map((s, i) => `<span class="pth" style="animation-delay:${.5+i*.15}s">${s[2]} ${s[1]}</span>${i < 3 ? `<span class="arr" style="animation-delay:${.57+i*.15}s">→</span>` : ""}`).join("")}</div>
+    <div class="trust fade d4"><span>🔒 Encrypted documents</span><span>⚡ Live progress</span><span>🎁 Ready for Day 1</span></div></section>
+  <section class="card login fade d2"><h2 style="font-size:24px">Sign in 👋</h2><p class="mut">Use the credentials from your welcome email.</p>
+  <form onsubmit="login(event)"><label>Email</label><input id="em" type="email" required autocomplete="username" placeholder="you@company.com">
+  <label>Password</label><input id="pw" type="password" required autocomplete="current-password" placeholder="••••••••">
+  <div id="npw" hidden><label>Choose a new password</label><input id="np" type="password" minlength="8" autocomplete="new-password"></div>
+  <button class="btn" id="lb" style="width:100%">Sign in</button></form></section></div>`;
+  typewriter();
+}
+async function login(e) {
+  e.preventDefault(); const b = $("#lb"); b.disabled = true;
+  try {
+    const user = $("#em").value.trim().toLowerCase(); let r;
+    if (chal) r = await idp("RespondToAuthChallenge", { ClientId: C.clientId, ChallengeName: "NEW_PASSWORD_REQUIRED", Session: chal.s, ChallengeResponses: { USERNAME: chal.u, NEW_PASSWORD: $("#np").value } });
+    else r = await idp("InitiateAuth", { ClientId: C.clientId, AuthFlow: "USER_PASSWORD_AUTH", AuthParameters: { USERNAME: user, PASSWORD: $("#pw").value } });
+    if (r.ChallengeName === "NEW_PASSWORD_REQUIRED") {
+      chal = { s: r.Session, u: r.ChallengeParameters.USER_ID_FOR_SRP || user };
+      $("#npw").hidden = false; $("#np").required = true; $("#np").focus(); b.textContent = "Set password & continue";
+      toast("First login: please set a new password"); return;
+    }
+    const tok = r.AuthenticationResult.IdToken, c = jwt(tok);
+    S = { tok, hr: String(c["cognito:groups"] || "").includes("HRAdmin"), eid: c["custom:employee_id"], name: c.name || c.email };
+    sessionStorage.setItem("onb", JSON.stringify(S)); splash(start);
+  } catch (err) { toast(err.message, true); } finally { b.disabled = false; }
+}
+function splash(cb) {
+  const first = String(S.name).split(/[ @]/)[0], d = document.createElement("div"); d.className = "splash";
+  d.innerHTML = `<div><div class="orb"></div><p class="g">${greet()}</p><h1 class="grad">${[...first].map((c, i) => `<span style="animation-delay:${.25+i*.07}s">${esc(c)}</span>`).join("")}</h1>
+  <p class="s">${S.hr ? "Opening your HR command centre…" : "Preparing your onboarding journey…"}</p></div>`;
+  document.body.append(d); confetti(60);
+  setTimeout(() => { d.classList.add("out"); setTimeout(() => { d.remove(); cb(); }, 700); }, 2400);
+}
+function logout() { sessionStorage.removeItem("onb"); S = null; loginView(); }
+function start() {
+  twTok++; $("#top").hidden = false; $("#role").textContent = S.hr ? "HR Admin" : "New Hire"; $("#uname").textContent = S.name;
+  if (S.hr) { hrView(); poll(refreshHr); } else { empView(); poll(refreshEmp); }
+}
+
+// ---------- Employee portal ----------
+function empView() {
+  $("#app").innerHTML = `
+  <section class="card fade hero"><div class="av">${esc(ini(S.name))}</div><div class="hx"><span class="eyebrow">${greet()} 👋</span><h1>${esc(S.name)}</h1>
+    <p class="mut" id="sub" style="margin:0">Loading your journey…</p><span class="pill" id="cd">🗓️ Counting down to Day 1…</span></div><div class="ring"><b id="pct">0%</b></div></section>
+  <section class="card fade d1"><h2>🧭 Your onboarding journey</h2><p class="mut">Four quick steps and you're ready to roll.</p><div class="bar"><i id="fill"></i></div><div class="steps" id="steps"></div></section>
+  <div class="grid">
+   <section class="card fade d2"><h2>📄 Documents</h2><p class="mut">PDF, JPG or PNG · max 5 MB each</p>
+    ${DOCS.map(([k, l]) => `<div class="doc"><b>${l}</b><span class="chip" id="c_${k}">Missing</span>
+      <div class="row"><input type="file" id="f_${k}" accept=".pdf,.jpg,.jpeg,.png"><button class="btn sm" onclick="upload('${k}',this)">Upload</button></div></div>`).join("")}</section>
+   <section class="card fade d3"><h2>✍️ Policy sign-off</h2><p class="mut">Unlocks once your documents are verified.</p>
+    <label class="chk"><input type="checkbox" id="pol"> I have read and accept the Code of Conduct, IT Security and Leave policies.</label>
+    <button class="btn" id="polbtn" onclick="sign(this)" disabled>Sign policies</button>
+    <h2 style="margin-top:26px">💻 Your equipment</h2><p class="mut" id="equip">Assigned automatically after documents are verified.</p></section>
+  </div><div id="day1"></div>`;
+}
+async function refreshEmp() {
+  const p = await api(`/employees/${S.eid}/progress`), st = Object.fromEntries(p.stages.map(s => [s.stage, s.status]));
+  $("#pct").textContent = p.percent + "%"; $(".ring").style.setProperty("--p", p.percent); $("#fill").style.width = p.percent + "%";
+  $("#steps").innerHTML = p.stages.map((s, i) => `<div class="step ${s.status}"><div class="dot">${s.status === "complete" ? "✓" : STAGES[i][2]}</div><span>${STAGES[i][1]}</span><small>${LABEL[s.status]}</small><em>${STAGES[i][3]}</em></div>`).join("");
+  DOCS.forEach(([k]) => { const d = (p.documents || {})[k], c = $("#c_" + k); if (!c) return;
+    c.textContent = d ? (d.status === "VERIFIED" ? "Verified ✓" : "Rejected: " + d.reason) : "Missing"; c.className = "chip " + (d ? (d.status === "VERIFIED" ? "ok" : "bad") : ""); });
+  $("#polbtn").disabled = st.POLICY_SIGNOFF !== "in_progress";
+  if (st.POLICY_SIGNOFF === "complete") { $("#polbtn").textContent = "Signed ✓"; $("#pol").checked = true; $("#pol").disabled = true; }
+  if (p.laptop_id) $("#equip").innerHTML = `Laptop <b>${esc(p.laptop_id)}</b><br>Work email <b>${esc(p.corporate_email)}</b>`;
+  const next = p.stages.find(s => s.status !== "complete");
+  $("#sub").textContent = next ? `Next up: ${STAGES.find(x => x[0] === next.stage)[1]} · ${p.percent}% complete` : "Everything is done!";
+  const days = Math.ceil((new Date(p.joining_date + "T00:00:00") - new Date().setHours(0, 0, 0, 0)) / 864e5);
+  $("#cd").textContent = isNaN(days) ? "🗓️ Day 1 is coming up" : days > 0 ? `🗓️ ${days} day${days > 1 ? "s" : ""} to Day 1 · ${p.joining_date}` : days === 0 ? "🚀 Today is Day 1!" : `🎉 Joined on ${p.joining_date}`;
+  if (p.overall_status === "READY_FOR_DAY1") {
+    if (!$("#day1").innerHTML) $("#day1").innerHTML = `<section class="card banner fade"><h1>🚀 You're ready for Day 1!</h1><p class="mut" style="margin:0">Joining date <b>${esc(p.joining_date)}</b> · Manager <b>${esc(p.manager)}</b> · Welcome to the team, ${esc(p.name)}!</p></section>`;
+    if (!celebrated) { celebrated = true; confetti(); }
+  }
+}
+async function upload(type, btn) {
+  const f = $("#f_" + type).files[0]; if (!f) return toast("Choose a file first", true);
+  btn.disabled = true;
+  try {
+    const { url, fields } = await api(`/employees/${S.eid}/upload-url`, { method: "POST", body: { doc_type: type, filename: f.name } });
+    const fd = new FormData(); Object.entries(fields).forEach(([k, v]) => fd.append(k, v)); fd.append("file", f);
+    const r = await fetch(url, { method: "POST", body: fd });
+    if (!r.ok) throw new Error("Upload rejected (check file type / size ≤ 5 MB)");
+    toast("Uploaded — verifying…"); setTimeout(() => refreshEmp().catch(() => {}), 2500);
+  } catch (e) { toast(e.message, true); } finally { btn.disabled = false; }
+}
+async function sign(btn) {
+  if (!$("#pol").checked) return toast("Please tick the checkbox to accept", true);
+  btn.disabled = true;
+  try { await api(`/employees/${S.eid}/stages/POLICY_SIGNOFF/complete`, { method: "POST" }); toast("Policies signed ✓"); setTimeout(() => refreshEmp().catch(() => {}), 1500); }
+  catch (e) { toast(e.message, true); btn.disabled = false; }
+}
+
+// ---------- HR dashboard ----------
+function hrView() {
+  $("#app").innerHTML = `
+  <section class="card fade hero"><div class="av">HR</div><div class="hx"><span class="eyebrow">${greet()} 👋</span><h1>Command Centre</h1><p class="mut" style="margin:0">Track every new hire from offer letter to Day 1, live.</p></div></section>
+  <section class="stats fade d1"><div class="card stat"><i>👥</i><b id="s1">0</b><span>New hires</span></div><div class="card stat"><i>⏳</i><b id="s2">0</b><span>In progress</span></div><div class="card stat"><i>🚀</i><b id="s3">0</b><span>Ready for Day 1</span></div></section>
+  <section class="card fade d2"><h2>➕ Add a new hire</h2><p class="mut">Creates the employee record, Cognito login and welcome email, then starts the workflow.</p>
+   <form class="fgrid" onsubmit="addHire(event)">
+    <div><label>Full name</label><input name="name" required></div><div><label>Email</label><input name="email" type="email" required></div>
+    <div><label>Department</label><input name="department" required></div><div><label>Role</label><input name="role" required></div>
+    <div><label>Manager</label><input name="manager" required></div><div><label>Joining date</label><input name="joining_date" type="date" required></div>
+    <div><label>Employment type</label><select name="employment_type"><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Intern</option></select></div>
+    <div><button class="btn" style="width:100%">Create & start</button></div></form></section>
+  <section class="card fade d3"><div class="between"><div><h2>📊 Onboarding pipeline</h2><span class="mut" id="upd" style="margin:0"></span></div><input class="srch" id="q" placeholder="🔎 Search name, role, department…" oninput="renderRows()"></div>
+   <div class="tw"><table><thead><tr><th>Employee</th><th>Department · Role</th><th>Progress</th><th>%</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table></div>
+   <div class="legend"><span><i style="background:var(--pend)"></i>Pending</span><span><i style="background:var(--prog)"></i>In progress</span><span><i style="background:var(--done)"></i>Complete</span><span>Segments: Documents → IT → Policies → Manager intro</span></div></section>`;
+}
+function renderRows() {
+  const q = ($("#q")?.value || "").toLowerCase(), first = !$("#rows").children.length;
+  const L = LIST.filter(e => [e.name, e.role, e.department, e.email].join(" ").toLowerCase().includes(q));
+  $("#rows").innerHTML = L.length ? L.map((e, i) => `<tr ${first ? `class="r" style="animation-delay:${i * .06}s"` : ""}><td><div class="who2"><div class="mini">${esc(ini(e.name))}</div><div><b>${esc(e.name)}</b><br><small class="mut">${esc(e.email)}</small></div></div></td>
+    <td>${esc(e.department)} · ${esc(e.role)}<br><small class="mut">${esc(e.employment_type)} · joins ${esc(e.joining_date)}</small></td>
+    <td><div class="segs">${e.stages.map((s, j) => `<div class="seg ${s.status}" title="${STAGES[j][1]}: ${LABEL[s.status]}"></div>`).join("")}</div></td>
+    <td><b>${e.percent}%</b></td>
+    <td><div class="acts">${e.stages[3].status === "in_progress" ? `<button class="btn sm" onclick="mgr('${e.employee_id}')">Mark intro done</button>` : (e.overall_status === "READY_FOR_DAY1" ? "<span class='chip ok'>✅ Ready for Day 1</span>" : "")}${e.stages[0].status === "complete" ? (e.offer_released_at ? "<span class='chip ok'>Offer released ✓</span>" : `<button class="btn sm" onclick="release('${e.employee_id}')">📨 Release offer letter</button>`) : "<span class='chip'>Offer: awaiting documents</span>"}<button class="ghost danger" onclick="removeHire('${e.employee_id}')">🗑 Remove</button></div></td></tr>`).join("")
+    : `<tr><td colspan="5" class="mut">${LIST.length ? "No matches." : "No hires yet. Add the first one above."}</td></tr>`;
+}
+async function refreshHr() {
+  LIST = await api("/employees"); renderRows();
+  countTo($("#s1"), LIST.length); countTo($("#s2"), LIST.filter(e => e.overall_status !== "READY_FOR_DAY1").length); countTo($("#s3"), LIST.filter(e => e.overall_status === "READY_FOR_DAY1").length);
+  $("#upd").textContent = "Live · updated " + new Date().toLocaleTimeString();
+}
+async function addHire(e) {
+  e.preventDefault(); const f = e.target, b = f.querySelector("button"); b.disabled = true;
+  try { const r = await api("/employees", { method: "POST", body: Object.fromEntries(new FormData(f)) });
+    toast(r.email_sent ? "Hire created · welcome email sent ✉️" : "Hire created · email NOT sent (verify recipient in SES sandbox)", !r.email_sent); f.reset(); refreshHr(); }
+  catch (err) { toast(err.message, true); } finally { b.disabled = false; }
+}
+async function mgr(id) { try { await api(`/employees/${id}/stages/MANAGER_INTRO/complete`, { method: "POST" }); toast("Manager intro confirmed ✓"); setTimeout(refreshHr, 1500); } catch (e) { toast(e.message, true); } }
+
+async function release(id) { try { const r = await api(`/employees/${id}/offer-letter`, { method: "POST" }); toast(r.offer_sent ? "Offer letter released & emailed ✉️" : "Offer letter NOT sent (verify recipient in SES)", !r.offer_sent); refreshHr(); } catch (e) { toast(e.message, true); } }
+async function removeHire(id) { const n = (LIST.find(x => x.employee_id === id) || {}).name || "this employee";
+  if (!confirm(`Remove ${n}? This permanently deletes their login, documents and onboarding records.`)) return;
+  try { await api(`/employees/${id}`, { method: "DELETE" }); toast(`${n} removed`); refreshHr(); } catch (e) { toast(e.message, true); } }
+
+S ? start() : loginView();
+</script>
+</body>
+</html>
